@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Information System</title>
+    <style>
+        /* CSS code */
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        
+        th, td {
+          padding: 8px;
+          text-align: left;
+          border: 1px solid black; /* Add border to both th and td elements */
+        }
+        
+        th {
+          background-color: #f2f2f2;
+        }
+        
+        th.name,
+        th.pan,
+        th.gender,
+        th.age,
+        th.email,
+        th.city,
+        th.action {
+          background-color: yellow; /* Set background color to yellow for the specified column headers */
+        }
+        
+        input[type="text"] {
+          padding: 8px;
+          width: calc(100% - 16px); /* Adjusting width to account for padding */
+        }
+        
+        button {
+          padding: 8px 16px;
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          cursor: pointer;
+        }
+        
+        .button-container {
+          margin-bottom: 20px;
+        }
+        
+        .button-container input[type="text"],
+        .button-container button {
+          margin-right: 10px;
+        }
+        
+        .hidden {
+          display: none;
+        }
+
+    </style>
+</head>
+<body>
+  <h2>Input Form</h2>
+
+  <form id="myForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required>
+      <br><br>
+      <label for="pan">PAN:</label>
+      <input type="text" id="pan" name="pan" pattern="[A-Za-z0-9]{10}" title="PAN should be alphanumeric and 10 characters long" required data-parameter="pan" autocapitalize="off">
+      <br><br>
+      <label for="age">Age:</label>
+      <input type="number" id="age" name="age" min="1" required data-parameter="age">
+      <br><br>
+      <label for="gender">Gender:</label>
+      <select id="gender" name="gender" required data-parameter="gender">
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+          <option value="others">Others</option>
+      </select>
+      <br><br>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required data-parameter="email">
+      <br><br>
+      <label for="city">City:</label>
+      <input type="text" id="city" name="city" required>
+      <br><br>
+      <button type="submit">Submit</button>
+  </form>
+  
+  <br><br>
+  <input type="text" id="searchInput" placeholder="Search...">
+  <br><br>
+  <button onclick="searchTable()">Search</button>
+  <br><br>
+  <table id="myTable">
+    <th class="name">Name</th>
+    <th class="pan">PAN</th>
+    <th class="age">Age</th>
+    <th class="gender">Gender</th>
+    <th class="email">Email</th>
+    <th class="city">City</th>
+    <th class="action">Action</th>  
+  </table>
+
+    <script>
+        // JavaScript code
+        const form = document.getElementById('myForm');
+        const table = document.getElementById('myTable');
+        const rowsPerPage = 10; // Maximum records per page
+        let currentPage = 1; // Current page
+        let editMode = false;
+        let editedRow;
+
+        function autocomplete(input, arr) {
+          let currentFocus;
+      
+          input.addEventListener('input', function(e) {
+              const val = this.value;
+      
+              closeAllLists();
+              if (!val) { return false; }
+              currentFocus = -1;
+      
+              const div = document.createElement('div');
+              div.setAttribute('id', this.id + 'autocomplete-list');
+              div.setAttribute('class', 'autocomplete-items');
+              this.parentNode.appendChild(div);
+      
+              for (let i = 0; i < arr.length; i++) {
+                  if (arr[i].toUpperCase().includes(val.toUpperCase())) {
+                      const option = document.createElement('div');
+                      option.innerHTML = '<strong>' + arr[i].substr(0, val.length) + '</strong>';
+                      option.innerHTML += arr[i].substr(val.length);
+                      option.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+                      option.addEventListener('click', function(e) {
+                          input.value = this.getElementsByTagName('input')[0].value;
+                          closeAllLists();
+                      });
+                      div.appendChild(option);
+                  }
+              }
+          });
+      
+          input.addEventListener('keydown', function(e) {
+              let x = document.getElementById(this.id + 'autocomplete-list');
+              if (x) x = x.getElementsByTagName('div');
+              if (e.keyCode == 40) {
+                  currentFocus++;
+                  addActive(x);
+              } else if (e.keyCode == 38) {
+                  currentFocus--;
+                  addActive(x);
+              } else if (e.keyCode == 13) {
+                  e.preventDefault();
+                  if (currentFocus > -1) {
+                      if (x) x[currentFocus].click();
+                  }
+              }
+          });
+      
+          function addActive(x) {
+              if (!x) return false;
+              removeActive(x);
+              if (currentFocus >= x.length) currentFocus = 0;
+              if (currentFocus < 0) currentFocus = (x.length - 1);
+              x[currentFocus].classList.add('autocomplete-active');
+          }
+      
+          function removeActive(x) {
+              for (let i = 0; i < x.length; i++) {
+                  x[i].classList.remove('autocomplete-active');
+              }
+          }
+      
+          function closeAllLists(elmnt) {
+              const x = document.getElementsByClassName('autocomplete-items');
+              for (let i = 0; i < x.length; i++) {
+                  if (elmnt != x[i] && elmnt != input) {
+                      x[i].parentNode.removeChild(x[i]);
+                  }
+              }
+          }
+      
+          // Click event listener cleanup
+          document.addEventListener('click', function (e) {
+              closeAllLists(e.target);
+          });
+      }
+      
+      // Define autocomplete data
+      const cities = [
+    'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Ahmedabad', 'Chennai', 'Kolkata', 'Surat', 'Pune','Jaipur', 'Lucknow', 'Kanpur', 'Nagpur', 'Visakhapatnam', 'Indore', 'Thane', 'Bhopal', 'Patna','Vadodara', 'Ghaziabad', 'Ludhiana', 'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Varanasi','Srinagar', 'Aurangabad', 'Dhanbad', 'Amritsar', 'Navi Mumbai', 'Allahabad', 'Howrah', 'Gwalior','Jabalpur', 'Coimbatore', 'Vijayawada', 'Jodhpur', 'Madurai', 'Raipur', 'Kota', 'Guwahati', 'Chandigarh','Solapur', 'Hubli–Dharwad', 'Bareilly', 'Moradabad', 'Mysore', 'Gurgaon', 'Aligarh', 'Jalandhar', 'Tiruchirappalli'
+];
+
+      
+      // Initialize autocomplete
+      const cityInput = document.getElementById('city');
+      autocomplete(cityInput, cities);
+      
+      // Form submit event listener
+      form.addEventListener('submit', function(event) {
+          event.preventDefault();
+          
+          const name = document.getElementById('name').value;
+          const pan = document.getElementById('pan').value;
+          const age = document.getElementById('age').value;
+          const gender = document.getElementById('gender').value;
+          const email = document.getElementById('email').value;
+          const city = document.getElementById('city').value;
+      
+          // Form validation (e.g., check if PAN is unique)
+      
+          if (editMode) {
+              editedRow.cells[0].textContent = name;
+              editedRow.cells[1].textContent = pan;
+              editedRow.cells[2].textContent = age;
+              editedRow.cells[3].textContent = gender;
+              editedRow.cells[4].textContent = email;
+              editedRow.cells[5].textContent = city;
+      
+              editMode = false;
+              editedRow = null;
+          } else {
+              const newRow = table.insertRow(-1);
+              const cell1 = newRow.insertCell(0);
+              const cell2 = newRow.insertCell(1);
+              const cell3 = newRow.insertCell(2);
+              const cell4 = newRow.insertCell(3);
+              const cell5 = newRow.insertCell(4);
+              const cell6 = newRow.insertCell(5);
+              const cell7 = newRow.insertCell(6);
+      
+              cell1.textContent = name;
+              cell2.textContent = pan;
+              cell3.textContent = age;
+              cell4.textContent = gender;
+              cell5.textContent = email;
+              cell6.textContent = city;
+              cell7.innerHTML = `<div class="action-buttons">
+                                    <button onclick="editRow(this)">Edit</button>
+                                    <button onclick="deleteRow(this)">Delete</button>
+                                  </div>`;
+          }
+      
+          form.reset();
+      });
+      
+      function editRow(button) {
+          const row = button.parentNode.parentNode.parentNode;
+          const cells = row.cells;
+      
+          document.getElementById('name').value = cells[0].textContent;
+          document.getElementById('pan').value = cells[1].textContent;
+          document.getElementById('age').value = cells[2].textContent;
+          document.getElementById('gender').value = cells[3].textContent;
+          document.getElementById('email').value = cells[4].textContent;
+          document.getElementById('city').value = cells[5].textContent;
+      
+          editMode = true;
+          editedRow = row;
+      }
+      
+      function deleteRow(button) {
+          const row = button.parentNode.parentNode.parentNode;
+          row.remove();
+      }
+      
+      function searchTable() {
+          const input = document.getElementById('searchInput').value.toLowerCase();
+          const rows = table.getElementsByTagName('tr');
+          
+          for (let i = 1; i < rows.length; i++) {
+              const rowData = rows[i].textContent.toLowerCase();
+              if (rowData.includes(input)) {
+                  rows[i].style.display = '';
+              } else {
+                  rows[i].style.display = 'none';
+              }
+          }
+      }
+      
+      // Pagination
+      function showPage(pageNumber) {
+          const rows = table.rows;
+          const startIndex = (pageNumber - 1) * rowsPerPage + 1;
+          const endIndex = startIndex + rowsPerPage - 1;
+      
+          for (let i = 1; i < rows.length; i++) {
+              if (i >= startIndex && i <= endIndex) {
+                  rows[i].style.display = '';
+              } else {
+                  rows[i].style.display = 'none';
+              }
+          }
+      }
+      
+      function nextPage() {
+          const totalPages = Math.ceil((table.rows.length - 1) / rowsPerPage);
+          if (currentPage < totalPages) {
+              currentPage++;
+              showPage(currentPage);
+          }
+      }
+      
+      function prevPage() {
+          if (currentPage > 1) {
+              currentPage--;
+              showPage(currentPage);
+          }
+      }
+      
+      // Show the first page initially
+      showPage(currentPage);
+
+    </script>
+</body>
+</html>
+
+
