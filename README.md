@@ -1,6 +1,8 @@
 # Empolyee_Information_System
 This repository houses a robust Employee Management System built using Python and Django. It offers an intuitive interface for inputting, storing, and managing employee data efficiently.
 
+![Video](https://youtu.be/KK9XZhqFTEg)
+
 # OVERVIEW
 This GitHub repository contains the source code for an Employee Information System developed using Python , Django & MySQL. This project is divided into 2 major parts i.e FRONTEND using HTML,CSS,JavaScript(User Interface) and BACKEND USING Django,Mysql and python.
 The Employee Information System allows users to manage employee records including their personal details, such as name, age, gender, email, city, and PAN number.The system allows users to input, store, and manage employee data efficiently. Users can add, edit, and delete employee entries, with pagination for easy navigation through large datasets. The system is built using the Django framework, providing a robust and scalable solution for managing employee information in various organizations. Whether you're a developer looking to explore Django or an organization in need of an employee management system, this repository serves as a comprehensive starting point.
